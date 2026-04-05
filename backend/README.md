@@ -1,121 +1,87 @@
-# SalesPilot – Backend
+# SalesPilot Backend
 
-## Overview
-SalesPilot is a backend system built with Node.js and Express.js for managing sales data.  
-It provides RESTful APIs for CRUD operations, supports CSV-based bulk data import, and implements JWT-based authentication with protected routes.
+SalesPilot Backend is the Node.js and Express API for SalesCopilot AI. It manages authentication, sales data, CSV import, and database access for the admin dashboard.
 
----
+## Current Scope
 
-## Tech Stack
+- JWT-based authentication
+- protected sales routes
+- create, read, update, and delete sales
+- quantity support on sales records
+- CSV import endpoint
+- request logging
+- centralized error handling
+
+## Stack
 
 - Node.js
-- Express.js
+- Express
 - PostgreSQL
-- JSON Web Token (JWT)
+- JWT
 - Multer
-- CSV Parser
+- csv-parser
 - dotenv
-
----
-
-## Features
-
-- User authentication using JWT
-- Protected API routes
-- CRUD operations for sales data
-- CSV file upload and bulk data processing
-- Error handling and logging
-- RESTful API design
-
----
 
 ## Project Structure
 
-```
-salespilot_admin_dashboard/
-├── controllers/
-├── routes/
-├── middleware/
-├── models/
-├── uploads/
-├── config/
-├── app.js
-└── .env
-```
-
----
-
-## Authentication
-
-Authentication is handled using JWT.  
-Protected routes require a valid token.
-
-Include the token in request headers:
-
-```
-Authorization: Bearer <token>
+```text
+backend/
+  src/
+    config/
+    controllers/
+    middleware/
+    routes/
+  sql/
+  package.json
 ```
 
----
+## Setup
 
-## CSV Import
+### Install dependencies
 
-The system allows uploading CSV files, which are parsed and stored in the database.
-
----
-
-## Setup Instructions
-
-### 1. Clone the repository
-
-```
-git clone https://github.com/your-username/salespilot.git
-```
-
-### 2. Install dependencies
-
-```
+```bash
 npm install
 ```
 
-### 3. Configure environment variables
+### Configure environment variables
 
-Create a `.env` file:
+Create `.env`:
 
-```
-PORT=5000
-DB_URL=your_database_url
+```env
+PORT=5001
 JWT_SECRET=your_secret_key
 ```
 
-### 4. Run the application
+Database connection values are currently defined in `src/config/db.js`.
 
+### Run the API
+
+```bash
+npm run dev
 ```
-npm start
+
+The backend runs on `http://localhost:5001`.
+
+## Routes
+
+- `POST /auth/login`
+- `GET /sales`
+- `GET /sales/:id`
+- `POST /sales`
+- `PUT /sales/:id`
+- `DELETE /sales/:id`
+- `POST /sales/import`
+
+## Database Notes
+
+If your local database was created before quantity support was added, run the migration in `sql/add_quantity_to_sales.sql`.
+
+## Authentication
+
+Protected routes require a valid JWT in the request header:
+
+```text
+Authorization: Bearer <token>
 ```
 
----
-
-## API Endpoints
-
-### Authentication
-
-- POST `/api/auth/register`
-- POST `/api/auth/login`
-
-### Sales
-
-- GET `/api/sales`
-- POST `/api/sales`
-- PUT `/api/sales/:id`
-- DELETE `/api/sales/:id`
-
-### CSV Upload
-
-- POST `/api/upload`
-
----
-
-## Notes
-
-This project demonstrates the implementation of core backend concepts including API design, authentication, file handling, and database interaction.
+Development credentials are configured locally and are intentionally not documented in this README.
