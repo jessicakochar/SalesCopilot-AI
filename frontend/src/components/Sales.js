@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import SalesForm from "./SalesForm";
 import SalesTable from "./SalesTable";
 import "./Sales.css";
+import RevenueCharts from "./RevenueCharts";
+import { formatMonthlyData } from "../utils/formatChartData";
 
 const API_BASE_URL =
   process.env.REACT_APP_API_URL ||
@@ -21,6 +23,10 @@ export default function Sales() {
   const [newProduct, setNewProduct] = useState("");
   const [newAmount, setNewAmount] = useState("");
   const [newQuantity, setNewQuantity] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showFullChart, setShowFullChart] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -154,11 +160,68 @@ export default function Sales() {
     } finally {
       setIsSubmitting(false);
     }
+    
   };
 
-  const totalRevenue = sales.reduce((total, sale) => total + Number(sale.amount || 0), 0);
-  const totalUnits = sales.reduce((total, sale) => total + Number(sale.quantity || 0), 0);
-  const averageRevenue = sales.length ? totalRevenue / sales.length : 0;
+  const filteredSales = sales.filter((sale) => {
+    const matchesName = sale.product_name
+      .toLowerCase()
+      .includes(searchTerm.trim().toLowerCase());
+    const saleDate = new Date(sale.created_at);
+    const matchesStartDate = startDate
+      ? saleDate >= new Date(`${startDate}T00:00:00`)
+      : true;
+    const matchesEndDate = endDate
+      ? saleDate <= new Date(`${endDate}T23:59:59`)
+      : true;
+
+    return matchesName && matchesStartDate && matchesEndDate;
+  });
+
+  const totalRevenue = filteredSales.reduce(
+    (total, sale) => total + Number(sale.amount || 0),
+    0
+  );
+  const totalUnits = filteredSales.reduce(
+    (total, sale) => total + Number(sale.quantity || 0),
+    0
+  );
+  const averageRevenue = filteredSales.length ? totalRevenue / filteredSales.length : 0;
+  const topProduct = filteredSales.reduce((bestSale, sale) => {
+    if (!bestSale || Number(sale.amount || 0) > Number(bestSale.amount || 0)) {
+      return sale;
+    }
+
+    return bestSale;
+  }, null);
+
+  const handleExportCSV = () => {
+    if (filteredSales.length === 0) return;
+
+    const headers = ["product_name", "amount", "quantity", "created_at"];
+    const rows = filteredSales.map((sale) =>
+      [sale.product_name, sale.amount, sale.quantity, sale.created_at]
+        .map((value) => `"${String(value ?? "").replace(/"/g, '""')}"`)
+        .join(",")
+    );
+    const csvContent = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "sales-export.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const fullChartData = formatMonthlyData(filteredSales);
+  const recentChartData = formatMonthlyData(filteredSales, 3);
+  const previewChartData = showFullChart ? fullChartData : recentChartData;
 
   return (
     <div className="sales-container">
@@ -178,8 +241,8 @@ export default function Sales() {
 
       <section className="stats-grid">
         <article className="stat-card">
-          <p>Total sales</p>
-          <strong>{sales.length}</strong>
+          <p>Visible sales</p>
+          <strong>{filteredSales.length}</strong>
         </article>
         <article className="stat-card">
           <p>Total revenue</p>
@@ -195,7 +258,24 @@ export default function Sales() {
           <p>Total units</p>
           <strong>{totalUnits.toLocaleString()}</strong>
         </article>
+        <article className="stat-card">
+          <p>Top product</p>
+          <strong>{topProduct?.product_name || "No results"}</strong>
+        </article>
       </section>
+      <section
+  className={`panel ${showFullChart ? "full-chart" : ""}`}
+  onClick={() => setShowFullChart(!showFullChart)}
+  style={{ cursor: "pointer" }}
+>
+  <RevenueCharts data={previewChartData} />
+
+  <p style={{ fontSize: "12px", opacity: 0.6, marginTop: "8px" }}>
+    {showFullChart
+      ? "Click to collapse to 3 months"
+      : "Click to view full year"}
+  </p>
+</section>
 
       {errorMessage ? <p className="form-error page-error">{errorMessage}</p> : null}
 
@@ -217,7 +297,14 @@ export default function Sales() {
           />
 
           <SalesTable
-            sales={sales}
+            sales={filteredSales}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            onExportCSV={handleExportCSV}
             editingId={editingId}
             editProduct={editProduct}
             setEditProduct={setEditProduct}

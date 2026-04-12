@@ -229,6 +229,12 @@ input {
   margin-bottom: 18px;
 }
 
+.panel-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .panel-heading h3,
 .empty-state h3 {
   margin: 0;
@@ -249,6 +255,25 @@ input {
   grid-template-columns: 1.4fr 1fr 0.8fr auto;
   gap: 14px;
   align-items: end;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.search-field {
+  max-width: none;
+}
+
+.filter-field {
+  max-width: none;
+}
+
+.export-btn {
+  white-space: nowrap;
 }
 
 .table-wrap {
@@ -304,6 +329,10 @@ input {
   text-align: center;
 }
 
+.compact-empty-state {
+  padding: 18px 0 6px;
+}
+
 .empty-state p,
 .loading-panel p {
   margin: 8px 0 0;
@@ -326,12 +355,14 @@ input {
 @media (max-width: 900px) {
   .login-card,
   .sales-form,
-  .stats-grid {
+  .stats-grid,
+  .filter-grid {
     grid-template-columns: 1fr;
   }
 
   .hero-card,
-  .panel-heading {
+  .panel-heading,
+  .panel-actions {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -340,4 +371,15 @@ input {
   .login-form {
     padding: 32px 24px;
   }
+}
+.full-chart {
+  position: fixed;
+  top: 5%;
+  left: 5%;
+  width: 90%;
+  height: 80%;
+  background: white;
+  z-index: 1000;
+  padding: 20px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
 }

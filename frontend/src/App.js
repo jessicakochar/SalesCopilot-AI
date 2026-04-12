@@ -12,7 +12,7 @@ function App() {
         {/* Default route */}
         <Route
           path="/"
-          element={<Navigate to="/sales" replace />}
+          element={<Navigate to="/login" replace />}
         />
 
         {/* Login */}

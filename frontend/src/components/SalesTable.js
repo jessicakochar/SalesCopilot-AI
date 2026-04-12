@@ -1,5 +1,12 @@
 export default function SalesTable({
   sales,
+  searchTerm,
+  setSearchTerm,
+  startDate,
+  setStartDate,
+  endDate,
+  setEndDate,
+  onExportCSV,
   editingId,
   editProduct,
   setEditProduct,
@@ -12,16 +19,6 @@ export default function SalesTable({
   deleteSale,
   isSubmitting,
 }) {
-  if (sales.length === 0) {
-    return (
-      <section className="panel empty-state">
-        <p className="panel-kicker">No data yet</p>
-        <h3>Your sales table is empty</h3>
-        <p>Add your first sale above to start building the dashboard.</p>
-      </section>
-    );
-  }
-
   return (
     <section className="panel">
       <div className="panel-heading">
@@ -29,9 +26,57 @@ export default function SalesTable({
           <p className="panel-kicker">Sales records</p>
           <h3>Latest entries</h3>
         </div>
-        <span className="table-count">{sales.length} items</span>
+        <div className="panel-actions">
+          <span className="table-count">{sales.length} items</span>
+          <button
+            className="secondary-btn export-btn"
+            onClick={onExportCSV}
+            disabled={sales.length === 0}
+          >
+            Export CSV
+          </button>
+        </div>
       </div>
 
+      <div className="filter-grid">
+        <label className="field-group search-field">
+          <span>Search by product name</span>
+          <input
+            type="text"
+            placeholder="Type a product name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </label>
+
+        <label className="field-group filter-field">
+          <span>Start date</span>
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+        </label>
+
+        <label className="field-group filter-field">
+          <span>End date</span>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+        </label>
+      </div>
+
+      {sales.length === 0 ? (
+        <section className="empty-state compact-empty-state">
+          <p className="panel-kicker">No matching data</p>
+          <h3>No sales match your current filters</h3>
+          <p>Try adjusting the product name or date range.</p>
+        </section>
+      ) : null}
+
+      {sales.length > 0 ? (
       <div className="table-wrap">
         <table className="sales-table">
           <thead>
@@ -116,6 +161,7 @@ export default function SalesTable({
           </tbody>
         </table>
       </div>
+      ) : null}
     </section>
   );
 }
